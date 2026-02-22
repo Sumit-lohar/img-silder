@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>3D Anniversary Slider</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: radial-gradient(circle at center,#ff0000 0%,#8b0000 40%,#000 80%);
+  font-family:Segoe UI,sans-serif;
+}
+
+/* Scene responsive */
+.scene{
+  width:60vw;
+  max-width:200px;
+  height:80vw;
+  max-height:300px;
+  perspective:1200px;
+  position:relative;
+}
+
+.carousel{
+  width:100%;
+  height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+}
+
+.rotating{
+  width:100%;
+  height:100%;
+  position:absolute;
+  transform-style:preserve-3d;
+}
+
+.card{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:20px;
+  overflow:hidden;
+  backface-visibility:hidden;
+}
+
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
+
+/* Center Text Responsive */
+.center-text{
+  position:absolute;
+  width:100%;
+  text-align:center;
+  top:50%;
+  transform:translateY(-50%) translateZ(300px);
+  color:white;
+  font-size:clamp(16px,4vw,26px);
+  font-weight:bold;
+  text-shadow:
+    0 0 10px white,
+    0 0 20px red,
+    0 0 40px red;
+  animation:pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse{
+  from{ transform:translateY(-50%) translateZ(300px) scale(1); }
+  to{ transform:translateY(-50%) translateZ(300px) scale(1.08); }
+}
+
+/* Music Button */
+#musicBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 20px;
+  border:none;
+  border-radius:30px;
+  background:red;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+  box-shadow:0 0 15px red;
+}
+
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" loop>
+  <source src="./music/nagua.mpeg" type="audio/mpeg">
+</audio>
+
+<button id="musicBtn">🔊 Play</button>
+
+<div class="scene">
+  <div class="carousel">
+
+    <div class="center-text">
+      Happy Wedding Anniversary 
+      <pre> Anna❤️Vahini </pre>
+    </div>
+
+    <div class="rotating" id="rotating">
+      <div class="card"><img src="./img/1.jpeg"></div>
+      <div class="card"><img src="./img/2.jpeg"></div>
+      <div class="card"><img src="./img/3.jpeg"></div>
+      <div class="card"><img src="./img/4.jpeg"></div>
+      <div class="card"><img src="./img/5.jpeg"></div>
+      <div class="card"><img src="./img/6.jpeg"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+const rotating = document.getElementById("rotating");
+const cards = document.querySelectorAll(".card");
+const music = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+
+const total = cards.length;
+const angle = 360 / total;
+const radius = window.innerWidth < 600 ? 300 : 500;
+
+let currentRotation = 0;
+let isDragging = false;
+let startX;
+
+// Arrange cards
+cards.forEach((card, i) => {
+  card.style.transform =
+    `rotateY(${i * angle}deg) translateZ(${radius}px)`;
+});
+
+// Mouse Drag
+rotating.addEventListener("mousedown", (e)=>{
+  isDragging = true;
+  startX = e.clientX;
+});
+
+window.addEventListener("mouseup", ()=> isDragging = false);
+
+window.addEventListener("mousemove", (e)=>{
+  if(!isDragging) return;
+  let moveX = e.clientX - startX;
+  currentRotation += moveX * 0.3;
+  rotating.style.transform = `rotateY(${currentRotation}deg)`;
+  startX = e.clientX;
+});
+
+// 📱 Touch Support (Mobile)
+rotating.addEventListener("touchstart", (e)=>{
+  startX = e.touches[0].clientX;
+});
+
+rotating.addEventListener("touchmove", (e)=>{
+  let moveX = e.touches[0].clientX - startX;
+  currentRotation += moveX * 0.3;
+  rotating.style.transform = `rotateY(${currentRotation}deg)`;
+  startX = e.touches[0].clientX;
+});
+
+// Auto rotate
+setInterval(()=>{
+  currentRotation += 0.15;
+  rotating.style.transform = `rotateY(${currentRotation}deg)`;
+},16);
+
+// Music
+musicBtn.addEventListener("click", ()=>{
+  if(music.paused){
+    music.play();
+    musicBtn.innerText = "🔊 Music On";
+  } else {
+    music.pause();
+    musicBtn.innerText = "🔇 Music Off";
+  }
+});
+
+// Autoplay fix
+document.addEventListener("click", ()=>{
+  music.play().catch(()=>{});
+},{once:true});
+
+</script>
+
+</body>
+</html>
